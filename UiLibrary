@@ -38,6 +38,7 @@ local function MakeDraggable(frame)
             dragging = true
             dragStart = input.Position
             startPos = frame.Position
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -120,7 +121,6 @@ function UILibrary:CreateWindow(title, size, position)
     contentFrame.Position = UDim2.new(0, 0, 0, 30)
     contentFrame.BackgroundTransparency = 1
     contentFrame.ScrollBarThickness = 5
-    contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)  -- Inicial
     contentFrame.Parent = mainFrame
 
     local uiListLayout = Instance.new("UIListLayout")
@@ -128,14 +128,14 @@ function UILibrary:CreateWindow(title, size, position)
     uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     uiListLayout.Parent = contentFrame
 
-    -- Atualização automática do CanvasSize
+    -- Atualização AUTOMÁTICA do CanvasSize (essa é a mágica!)
     uiListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         contentFrame.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 10)
     end)
 
     local windowObject = {
         Content = contentFrame,
-        -- AddButton, AddLabel, etc. sem as linhas de CanvasSize no final!
+
         AddButton = function(self, text, callback)
             local button = Instance.new("TextButton")
             button.Size = UDim2.new(1, -10, 0, 30)
@@ -151,92 +151,16 @@ function UILibrary:CreateWindow(title, size, position)
             uiCornerBtn.Parent = button
 
             button.MouseButton1Click:Connect(callback or function() end)
+
             button.MouseEnter:Connect(function()
                 CreateTween(button, {BackgroundColor3 = self.Theme.AccentColor})
             end)
             button.MouseLeave:Connect(function()
                 CreateTween(button, {BackgroundColor3 = self.Theme.SecondaryColor})
             end)
-            -- Sem CanvasSize aqui!
+            -- SEM CanvasSize manual aqui!
         end,
-        -- Repita para os outros AddLabel, AddToggle, AddSlider, AddDropdown (sem a linha CanvasSize no final)
-        -- (cole o resto igual ao seu, só removendo essa linha)
-    }
 
-    return windowObject
-end
-
-function UILibrary:SetTheme(newTheme)
-    for key, value in pairs(newTheme) do
-        self.Theme[key] = value
-    end
-end
-
-return UILibrary
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -30, 0, 0)
-    closeButton.BackgroundTransparency = 1
-    closeButton.Text = "X"
-    closeButton.TextColor3 = self.Theme.TextColor
-    closeButton.Font = self.Theme.Font
-    closeButton.TextSize = self.Theme.FontSize
-    closeButton.Parent = titleBar
-
-    closeButton.MouseButton1Click:Connect(function()
-        CreateTween(mainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-        wait(0.3)
-        screenGui:Destroy()
-    end)
-
-    -- Animação de Abertura
-    mainFrame.Size = UDim2.new(0, 0, 0, 0)
-    CreateTween(mainFrame, {Size = size or UDim2.new(0, 400, 0, 300)}, 0.3)
-
-    MakeDraggable(titleBar)  -- Torna a janela arrastável pela barra de título
-
-    local contentFrame = Instance.new("ScrollingFrame")
-    contentFrame.Size = UDim2.new(1, 0, 1, -30)
-    contentFrame.Position = UDim2.new(0, 0, 0, 30)
-    contentFrame.BackgroundTransparency = 1
-    contentFrame.ScrollBarThickness = 5
-    contentFrame.Parent = mainFrame
-
-    local uiListLayout = Instance.new("UIListLayout")
-    uiListLayout.Padding = UDim.new(0, 5)
-    uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    uiListLayout.Parent = contentFrame
-    
-    uiListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    contentFrame.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 10)  -- +10 pra margem extra
-end)
-
-    -- Retorna um objeto para adicionar elementos
-    local windowObject = {
-        Content = contentFrame,
-        AddButton = function(self, text, callback)
-            local button = Instance.new("TextButton")
-            button.Size = UDim2.new(1, -10, 0, 30)
-            button.BackgroundColor3 = self.Theme.SecondaryColor
-            button.Text = text or "Botão"
-            button.TextColor3 = self.Theme.TextColor
-            button.Font = self.Theme.Font
-            button.TextSize = self.Theme.FontSize
-            button.Parent = self.Content
-
-            local uiCornerBtn = Instance.new("UICorner")
-            uiCornerBtn.CornerRadius = self.Theme.CornerRadius
-            uiCornerBtn.Parent = button
-
-            button.MouseButton1Click:Connect(callback or function() end)
-            button.MouseEnter:Connect(function()
-                CreateTween(button, {BackgroundColor3 = self.Theme.AccentColor})
-            end)
-            button.MouseLeave:Connect(function()
-                CreateTween(button, {BackgroundColor3 = self.Theme.SecondaryColor})
-            end)
-
-        end,
         AddLabel = function(self, text)
             local label = Instance.new("TextLabel")
             label.Size = UDim2.new(1, -10, 0, 20)
@@ -247,9 +171,9 @@ end)
             label.TextSize = self.Theme.FontSize
             label.TextXAlignment = Enum.TextXAlignment.Left
             label.Parent = self.Content
-
-            
+            -- SEM CanvasSize manual aqui!
         end,
+
         AddToggle = function(self, text, default, callback)
             local toggleFrame = Instance.new("Frame")
             toggleFrame.Size = UDim2.new(1, -10, 0, 30)
@@ -283,9 +207,9 @@ end)
                 CreateTween(toggleButton, {BackgroundColor3 = toggled and self.Theme.PrimaryColor or self.Theme.BackgroundColor})
                 if callback then callback(toggled) end
             end)
-
-            
+            -- SEM CanvasSize manual aqui!
         end,
+
         AddSlider = function(self, text, min, max, default, callback)
             local sliderFrame = Instance.new("Frame")
             sliderFrame.Size = UDim2.new(1, -10, 0, 40)
@@ -295,7 +219,7 @@ end)
             local sliderLabel = Instance.new("TextLabel")
             sliderLabel.Size = UDim2.new(1, 0, 0, 20)
             sliderLabel.BackgroundTransparency = 1
-            sliderLabel.Text = text or "Slider: " .. default
+            sliderLabel.Text = text .. ": " .. default
             sliderLabel.TextColor3 = self.Theme.TextColor
             sliderLabel.Font = self.Theme.Font
             sliderLabel.TextSize = self.Theme.FontSize
@@ -337,16 +261,15 @@ end)
             UserInputService.InputChanged:Connect(function(input)
                 if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
                     local relativeX = math.clamp((input.Position.X - sliderBar.AbsolutePosition.X) / sliderBar.AbsoluteSize.X, 0, 1)
-                    local value = min + (max - min) * relativeX
-                    value = math.round(value)
+                    local value = math.round(min + (max - min) * relativeX)
                     fill.Size = UDim2.new(relativeX, 0, 1, 0)
                     sliderLabel.Text = text .. ": " .. value
                     if callback then callback(value) end
                 end
             end)
-
-            
+            -- SEM CanvasSize manual aqui!
         end,
+
         AddDropdown = function(self, text, options, default, callback)
             local dropdownFrame = Instance.new("Frame")
             dropdownFrame.Size = UDim2.new(1, -10, 0, 30)
@@ -369,7 +292,7 @@ end)
             local expanded = false
             local optionsFrame = Instance.new("Frame")
             optionsFrame.Size = UDim2.new(1, 0, 0, 0)
-            optionsFrame.Position = UDim2.new(0, 0, 1, 0)
+            optionsFrame.Position = UDim2.new(0, 0, 1, 5)
             optionsFrame.BackgroundColor3 = self.Theme.BackgroundColor
             optionsFrame.Visible = false
             optionsFrame.Parent = dropdownFrame
@@ -388,10 +311,15 @@ end)
                 optButton.TextSize = self.Theme.FontSize
                 optButton.Parent = optionsFrame
 
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = self.Theme.CornerRadius
+                corner.Parent = optButton
+
                 optButton.MouseButton1Click:Connect(function()
                     dropdownButton.Text = option
                     expanded = false
                     optionsFrame.Visible = false
+                    CreateTween(optionsFrame, {Size = UDim2.new(1, 0, 0, 0)})
                     if callback then callback(option) end
                 end)
             end
@@ -399,17 +327,15 @@ end)
             dropdownButton.MouseButton1Click:Connect(function()
                 expanded = not expanded
                 optionsFrame.Visible = expanded
-                CreateTween(optionsFrame, {Size = expanded and UDim2.new(1, 0, 0, #options * 25 + (#options - 1) * 2) or UDim2.new(1, 0, 0, 0)})
+                CreateTween(optionsFrame, {Size = expanded and UDim2.new(1, 0, 0, #options * 27 + (#options - 1) * 2) or UDim2.new(1, 0, 0, 0)})
             end)
-
-            
+            -- SEM CanvasSize manual aqui!
         end
     }
 
     return windowObject
 end
 
--- Função para Alterar o Tema Global
 function UILibrary:SetTheme(newTheme)
     for key, value in pairs(newTheme) do
         self.Theme[key] = value
@@ -417,4 +343,3 @@ function UILibrary:SetTheme(newTheme)
 end
 
 return UILibrary
-
